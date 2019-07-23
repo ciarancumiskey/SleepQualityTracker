@@ -15,3 +15,49 @@
  */
 
 package com.example.android.trackmysleepquality.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+/**
+ * This class is abstract because Room handles its implementation already.
+ */
+@Database(entities = [SleepNight::class], version = 1, exportSchema = false)
+abstract class SleepDatabase : RoomDatabase() {
+    abstract val sleepDatabaseDao: SleepDatabaseDao
+
+    /**
+     * Allows clients to access the methods for creating/retrieving the database without
+     * instantiating the class.
+     */
+    companion object{
+        /**
+         * Its value will never be cached, all read/write operations will be done to main memory,
+         * and the value stays constant across all threads.
+         */
+        @Volatile
+        private var INSTANCE: SleepDatabase? = null //Keeps a reference to the database once that's created
+
+        /**
+         * Returns a reference to the database
+         */
+        fun getInstance(context: Context) : SleepDatabase {
+            //Prevents conflicts between threads for database values
+            synchronized(this){
+                var instance = INSTANCE
+                if(instance == null){
+                    instance = Room.databaseBuilder(
+                            context.applicationContext,
+                            SleepDatabase::class.java,
+                            "sleep_history_database"
+                    ).fallbackToDestructiveMigration() //It's not like there's any users who can get annoyed with losing their sleep data...yet
+                            .build()
+                    INSTANCE = instance
+                }
+                return instance
+            }
+        }
+    }
+}
