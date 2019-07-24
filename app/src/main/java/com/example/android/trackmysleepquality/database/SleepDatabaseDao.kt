@@ -21,18 +21,38 @@ import androidx.room.*
 
 @Dao
 interface SleepDatabaseDao {
+    /**
+     * @param newNight: The SleepNight to be inserted
+     */
     @Insert
-    fun insertNight(night: SleepNight) //Room will take care of the "Create" SQLite query
+    fun insertNight(newNight: SleepNight) //Room will take care of the "Create" SQLite query
 
+    /**
+     * Updates the inputted SleepNight
+     *
+     * @param night: The SleepNight to be updated
+     */
     @Update
     fun updateNight(night: SleepNight)
 
+    //Clears the table
+    @Query("DELETE FROM daily_sleep_quality_table")
+    fun deleteAllNights()
+
+    /**
+     * @param keyTimeMillis: The millisecond value that is used to derive any corresponding
+     * SleepNight
+     */
     @Query("SELECT * from daily_sleep_quality_table WHERE nightId = :keyTimeMillis")
     fun getNightFromLong(keyTimeMillis: Long): SleepNight?
 
-    @Query("SELECT * from daily_sleep_quality_table")
+    //Returns every saved night, starting from the most recent
+    @Query("SELECT * from daily_sleep_quality_table ORDER BY nightId DESC")
     fun getAllNights(): LiveData<List<SleepNight>>
 
+    /**
+     * @return: The most recently saved SleepNight entity
+     */
     @Query("SELECT * FROM daily_sleep_quality_table ORDER BY nightId DESC LIMIT 1")
     fun getTonight(): SleepNight?
 }
