@@ -68,6 +68,15 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
         uiScope.launch { tonight.value = getTonightFromDatabase() }
     }
 
+    val startButtonVisible = Transformations.map(tonight) {
+        null == it //tonight hasn't been initialised when the user hasn't pressed Start
+    }
+    val stopButtonVisible = Transformations.map(tonight) {
+        null != it //now that tonight's initialised, show Stop and hide Start
+    }
+    val clearButtonVisible = Transformations.map(nights) {
+        it?.isNotEmpty() //if the database has anything in it, the Clear button may be pressed
+    }
     /**
      * Needs to be suspended so that it can be called from within the coroutine without blocking
      * the UI thread.
