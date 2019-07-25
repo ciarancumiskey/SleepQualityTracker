@@ -17,7 +17,6 @@
 package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
-import android.content.res.Resources
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -77,6 +76,13 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
     val clearButtonVisible = Transformations.map(nights) {
         it?.isNotEmpty() //if the database has anything in it, the Clear button may be pressed
     }
+
+    private var inShowClearDBSnackbarEvent = MutableLiveData<Boolean>()
+    val showClearDatabaseSnackbarEvent: LiveData<Boolean>
+        get() = inShowClearDBSnackbarEvent
+    fun doneShowingSnackbar() {
+        inShowClearDBSnackbarEvent.value = false
+    }
     /**
      * Needs to be suspended so that it can be called from within the coroutine without blocking
      * the UI thread.
@@ -114,6 +120,7 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Applica
         uiScope.launch {
             finalDeletion()
             tonight.value = null
+            inShowClearDBSnackbarEvent.value = true
         }
     }
 
