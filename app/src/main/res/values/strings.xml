@@ -50,6 +50,10 @@
     <string name="four_pretty_good">Pretty good</string>
     <string name="five_excellent">Excellent!</string>
 
+    <!-- RecyclerView placeholder text -->
+    <string name="quality_too_high">I don\'t understand&#8230;there\'s only supposed to be 6 in each pack.</string>
+    <string name="pending">Pending result</string>
+
     <!-- Toast to play after Clear button has been pressed -->
     <string name="cleared_message">All your data is gone forever.</string>
     <string name="header_text">Sleep Results</string>

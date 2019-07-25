@@ -28,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.database.SleepDatabase
 import com.example.android.trackmysleepquality.databinding.FragmentSleepTrackerBinding
+import com.example.android.trackmysleepquality.sleepdetail.SleepNightAdapter
 import com.google.android.material.snackbar.Snackbar
 
 /**
@@ -52,7 +53,6 @@ class SleepTrackerFragment : Fragment() {
         val application = requireNotNull(this.activity).application
 
         val dataSource = SleepDatabase.getInstance(application).sleepDatabaseDao
-
         val viewModelFactory = SleepTrackerViewModelFactory(dataSource, application)
 
         val sleepTrackerViewModel =
@@ -61,6 +61,12 @@ class SleepTrackerFragment : Fragment() {
 
         binding.sleepTrackerViewModel = sleepTrackerViewModel
 
+        val sleepNightAdapter = SleepNightAdapter()
+        binding.sleepList.adapter = sleepNightAdapter
+        sleepTrackerViewModel.nights.observe(viewLifecycleOwner, Observer {
+            //Have a null check just in case of a null LiveData observer
+            it?.let{ sleepNightAdapter.sleepData = it }
+        })
         binding.setLifecycleOwner(this)
 
         // Add an Observer on the state variable for showing a Snackbar message
