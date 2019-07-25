@@ -28,117 +28,211 @@ import kotlinx.coroutines.*
 
 /**
  * ViewModel for SleepTrackerFragment.
- * @param database: For access to SleepDatabase
- * @param application: Needed for resource access
  */
-class SleepTrackerViewModel(val database: SleepDatabaseDao, application: Application)
-    : AndroidViewModel(application) {
+class SleepTrackerViewModel(
+        val database: SleepDatabaseDao,
+        application: Application) : AndroidViewModel(application) {
+
+    /**
+     * viewModelJob allows us to cancel all coroutines started by this ViewModel.
+     */
     private var viewModelJob = Job()
 
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
-    //Coroutines launched in uiScope will run on the main thread
+    /**
+     * A [CoroutineScope] keeps track of all coroutines started by this ViewModel.
+     *
+     * Because we pass it [viewModelJob], any coroutine started in this uiScope can be cancelled
+     * by calling `viewModelJob.cancel()`
+     *
+     * By default, all coroutines started in uiScope will launch in [Dispatchers.Main] which is
+     * the main thread on Android. This is a sensible default because most coroutines started by
+     * a [ViewModel] update the UI after performing some processing.
+     */
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     private var tonight = MutableLiveData<SleepNight?>()
-    private val nights = database.getAllNights()
 
-    private val inNavToSleepQuality = MutableLiveData<SleepNight>()
-    val navigateToSleepQuality: LiveData<SleepNight>
-        get() = inNavToSleepQuality
+    val nights = database.getAllNights()
 
-    fun doneNavigating() {
-        inNavToSleepQuality.value = null
-    }
-
-    //Convert the database entities to strings for the UI
-    val nightsString = Transformations.map(nights) {nights ->
+    /**
+     * Converted nights to Spanned for displaying.
+     */
+    val nightsString = Transformations.map(nights) { nights ->
         formatNights(nights, application.resources)
     }
 
-    init {
-        initialiseTonight()
-    }
-
-    private fun initialiseTonight() {
-        uiScope.launch { tonight.value = getTonightFromDatabase() }
-    }
-
+    /**
+     * If tonight has not been set, then the START button should be visible.
+     */
     val startButtonVisible = Transformations.map(tonight) {
-        null == it //tonight hasn't been initialised when the user hasn't pressed Start
-    }
-    val stopButtonVisible = Transformations.map(tonight) {
-        null != it //now that tonight's initialised, show Stop and hide Start
-    }
-    val clearButtonVisible = Transformations.map(nights) {
-        it?.isNotEmpty() //if the database has anything in it, the Clear button may be pressed
+        null == it
     }
 
-    private var inShowClearDBSnackbarEvent = MutableLiveData<Boolean>()
-    val showClearDatabaseSnackbarEvent: LiveData<Boolean>
-        get() = inShowClearDBSnackbarEvent
+    /**
+     * If tonight has been set, then the STOP button should be visible.
+     */
+    val stopButtonVisible = Transformations.map(tonight) {
+        null != it
+    }
+
+    /**
+     * If there are any nights in the database, show the CLEAR button.
+     */
+    val clearButtonVisible = Transformations.map(nights) {
+        it?.isNotEmpty()
+    }
+
+    /**
+     * Request a toast by setting this value to true.
+     *
+     * This is private because we don't want to expose setting this value to the Fragment.
+     */
+    private var _showSnackbarEvent = MutableLiveData<Boolean>()
+
+    /**
+     * If this is true, immediately `show()` a toast and call `doneShowingSnackbar()`.
+     */
+    val showSnackBarEvent: LiveData<Boolean>
+        get() = _showSnackbarEvent
+
+    /**
+     * Variable that tells the Fragment to navigate to a specific [SleepQualityFragment]
+     *
+     * This is private because we don't want to expose setting this value to the Fragment.
+     */
+
+    private val _navigateToSleepQuality = MutableLiveData<SleepNight>()
+    /**
+     * Call this immediately after calling `show()` on a toast.
+     *
+     * It will clear the toast request, so if the user rotates their phone it won't show a duplicate
+     * toast.
+     */
+
     fun doneShowingSnackbar() {
-        inShowClearDBSnackbarEvent.value = false
+        _showSnackbarEvent.value = false
     }
     /**
-     * Needs to be suspended so that it can be called from within the coroutine without blocking
-     * the UI thread.
-     * @return night - The most recently saved SleepNight in the database
+     * If this is non-null, immediately navigate to [SleepQualityFragment] and call [doneNavigating]
+     */
+    val navigateToSleepQuality: LiveData<SleepNight>
+        get() = _navigateToSleepQuality
+
+    /**
+     * Call this immediately after navigating to [SleepQualityFragment]
+     *
+     * It will clear the navigation request, so if the user rotates their phone it won't navigate
+     * twice.
+     */
+    fun doneNavigating() {
+        _navigateToSleepQuality.value = null
+    }
+
+    init {
+        initializeTonight()
+    }
+
+    private fun initializeTonight() {
+        uiScope.launch {
+            tonight.value = getTonightFromDatabase()
+        }
+    }
+
+    /**
+     *  Handling the case of the stopped app or forgotten recording,
+     *  the start and end times will be the same.j
+     *
+     *  If the start time and end time are not the same, then we do not have an unfinished
+     *  recording.
      */
     private suspend fun getTonightFromDatabase(): SleepNight? {
         return withContext(Dispatchers.IO) {
             var night = database.getTonight()
-            if(night?.endTimeMilli != night?.startTimeMilli){ //Night has been completed
+            if (night?.endTimeMilli != night?.startTimeMilli) {
                 night = null
             }
             night
         }
     }
 
-    fun onStartTracking(){
+    private suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            database.clear()
+        }
+    }
+
+    private suspend fun update(night: SleepNight) {
+        withContext(Dispatchers.IO) {
+            database.update(night)
+        }
+    }
+
+    private suspend fun insert(night: SleepNight) {
+        withContext(Dispatchers.IO) {
+            database.insert(night)
+        }
+    }
+
+    /**
+     * Executes when the START button is clicked.
+     */
+    fun onStartTracking() {
         uiScope.launch {
+            // Create a new night, which captures the current time,
+            // and insert it into the database.
             val newNight = SleepNight()
+
             insert(newNight)
+
             tonight.value = getTonightFromDatabase()
         }
     }
 
-    fun onStopTracking(){
+    /**
+     * Executes when the STOP button is clicked.
+     */
+    fun onStopTracking() {
         uiScope.launch {
-            //return from .launch(), not the lambda used in fragment_sleep_tracker.xml
+            // In Kotlin, the return@label syntax is used for specifying which function among
+            // several nested ones this statement returns from.
+            // In this case, we are specifying to return from launch(),
+            // not the lambda.
             val oldNight = tonight.value ?: return@launch
+
+            // Update the night in the database to add the end time.
             oldNight.endTimeMilli = System.currentTimeMillis()
+
             update(oldNight)
-            inNavToSleepQuality.value = oldNight
+
+            // Set state to navigate to the SleepQualityFragment.
+            _navigateToSleepQuality.value = oldNight
         }
     }
 
-    fun onClear(){
+    /**
+     * Executes when the CLEAR button is clicked.
+     */
+    fun onClear() {
         uiScope.launch {
-            finalDeletion()
+            // Clear the database table.
+            clear()
+
+            // And clear tonight since it's no longer in the database
             tonight.value = null
-            inShowClearDBSnackbarEvent.value = true
         }
+
+        // Show a snackbar message, because it's friendly.
+        _showSnackbarEvent.value = true
     }
 
-    suspend fun finalDeletion() {
-        withContext(Dispatchers.IO) {
-            database.deleteAllNights()
-        }
-    }
-
-    private suspend fun insert(night: SleepNight){
-        withContext(Dispatchers.IO) {
-            database.insertNight(night)
-        }
-    }
-    private suspend fun update(night: SleepNight){
-        withContext(Dispatchers.IO) {
-            database.updateNight(night)
-        }
+    /**
+     * Called when the ViewModel is dismantled.
+     * At this point, we want to cancel all coroutines;
+     * otherwise we end up with processes that have nowhere to return to
+     * using memory and resources.
+     */
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
     }
 }
-

@@ -23,6 +23,7 @@
          the whole ViewModel, so that we can access the LiveData,
          click handlers, and state variables. -->
     <data>
+
         <variable
             name="sleepTrackerViewModel"
             type="com.example.android.trackmysleepquality.sleeptracker.SleepTrackerViewModel" />
@@ -34,11 +35,20 @@
         android:layout_height="match_parent"
         tools:context=".sleeptracker.SleepTrackerFragment">
 
-        <!-- Simplest way of displaying scrollable text and data. There is a
-             better and more efficient way to do this, and you will learn about
-             RecyclerView in a later lesson. -->
 
-        <ScrollView
+
+        <!-- TODO (01) Replace the ScrollView with a RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sleep_list"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/clear_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stop_button"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <!-- Simplest way of displaying scrollable text and data. Made redundant by RecyclerView. -->
+        <!--ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/clear_button"
@@ -47,9 +57,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/stop_button">
 
-            <!-- In the TextView, we can access the nightsString LiveData,
+            <!|- In the TextView, we can access the nightsString LiveData,
                  which keeps it displayed and updated in the TextView
-                 whenever it changes. -->
+                 whenever it changes. _->
 
             <TextView
                 android:id="@+id/textview"
@@ -59,7 +69,7 @@
                 android:layout_marginTop="@dimen/margin"
                 android:layout_marginEnd="@dimen/margin"
                 android:text="@{sleepTrackerViewModel.nightsString}" />
-        </ScrollView>
+        </ScrollView-->
 
         <!-- With data binding and LiveData, we can track the buttons' visibility states
              from the ViewModel. The click handler is in the ViewModel as well, and

@@ -17,42 +17,63 @@
 package com.example.android.trackmysleepquality.database
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 
+/**
+ * Defines methods for using the SleepNight class with Room.
+ */
 @Dao
 interface SleepDatabaseDao {
-    /**
-     * @param newNight: The SleepNight to be inserted
-     */
+
     @Insert
-    fun insertNight(newNight: SleepNight) //Room will take care of the "Create" SQLite query
+    fun insert(night: SleepNight)
 
     /**
-     * Updates the inputted SleepNight
+     * When updating a row with a value already set in a column,
+     * replaces the old value with the new one.
      *
-     * @param night: The SleepNight to be updated
+     * @param night new value to write
      */
     @Update
-    fun updateNight(night: SleepNight)
-
-    //Clears the table
-    @Query("DELETE FROM daily_sleep_quality_table")
-    fun deleteAllNights()
+    fun update(night: SleepNight)
 
     /**
-     * @param keyTimeMillis: The millisecond value that is used to derive any corresponding
-     * SleepNight
+     * Selects and returns the row that matches the supplied start time, which is our key.
+     *
+     * @param key startTimeMilli to match
      */
-    @Query("SELECT * from daily_sleep_quality_table WHERE nightId = :keyTimeMillis")
-    fun getNightFromLong(keyTimeMillis: Long): SleepNight?
+    @Query("SELECT * from daily_sleep_quality_table WHERE nightId = :key")
+    fun get(key: Long): SleepNight?
 
-    //Returns every saved night, starting from the most recent
-    @Query("SELECT * from daily_sleep_quality_table ORDER BY nightId DESC")
+    /**
+     * Deletes all values from the table.
+     *
+     * This does not delete the table, only its contents.
+     */
+    @Query("DELETE FROM daily_sleep_quality_table")
+    fun clear()
+
+    /**
+     * Selects and returns all rows in the table,
+     *
+     * sorted by start time in descending order.
+     */
+    @Query("SELECT * FROM daily_sleep_quality_table ORDER BY nightId DESC")
     fun getAllNights(): LiveData<List<SleepNight>>
 
     /**
-     * @return: The most recently saved SleepNight entity
+     * Selects and returns the latest night.
      */
     @Query("SELECT * FROM daily_sleep_quality_table ORDER BY nightId DESC LIMIT 1")
     fun getTonight(): SleepNight?
+
+    /**
+     * Selects and returns the night with given nightId.
+     */
+    @Query("SELECT * from daily_sleep_quality_table WHERE nightId = :key")
+    fun getNightWithId(key: Long): LiveData<SleepNight>
 }
+

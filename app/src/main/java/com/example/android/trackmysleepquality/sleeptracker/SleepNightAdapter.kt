@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.example.android.trackmysleepquality.database
+package com.example.android.trackmysleepquality.sleeptracker
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+// TODO (02) Create SleepNightAdapter class and extend it
+// from RecyclerView.Adapter<TextItemViewHolder>
 
-@Entity(tableName = "daily_sleep_quality_table")
-data class SleepNight(
-        @PrimaryKey(autoGenerate = true)
-        var nightId: Long = 0L,
+// TODO (03) Create a variable, data, that holds a list of SleepNight.
 
-        @ColumnInfo(name = "start_time_milli")
-        val startTimeMilli: Long = System.currentTimeMillis(),
+// TODO (04) Override getItemCount() to return the total number of items in the data set.
 
-        @ColumnInfo(name = "end_time_milli")
-        var endTimeMilli: Long = startTimeMilli,
+// TODO (05) Override onBindViewHolder() and have it update the contents of the
+// ViewHolder to reflect the item at the given position.
 
-        @ColumnInfo(name = "quality_rating")
-        var sleepQuality: Int = -1
-)
+// TODO (06) Override onCreateViewHolder(). We'll complete this method
+// in a later exercise.

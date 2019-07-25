@@ -43,22 +43,18 @@
 
     <!-- Sleep quality strings -->
     <string name="how_was_hour_sleep">How was your sleep?</string>
-    <string name="og_zero_very_bad">Very bad</string>
-    <string name="og_one_poor">Poor</string>
-    <string name="og_two_soso">So-so</string>
-    <string name="og_three_ok">OK</string>
-    <string name="og_four_pretty_good">Hey, that\'s pretty good</string>
-    <string name="og_five_excellent">Excellent!</string>
-
-    <!-- I need my "Chernobyl" by HBO/Sky references -->
-    <string name="zero_very_bad">Woken up to put out a fire at Vladimir Ilyich Lenin power plant</string>
-    <string name="one_poor">Not great</string>
-    <string name="two_soso">Not horrifying</string>
-    <string name="three_ok">Not terrible</string>
-    <string name="four_pretty_good">I serve the Sleepyhead Union</string>
-    <string name="five_excellent">The propaganda number</string>
+    <string name="zero_very_bad">Very bad</string>
+    <string name="one_poor">Poor</string>
+    <string name="two_soso">So-so</string>
+    <string name="three_ok">OK</string>
+    <string name="four_pretty_good">Pretty good</string>
+    <string name="five_excellent">Excellent!</string>
 
     <!-- Toast to play after Clear button has been pressed -->
     <string name="cleared_message">All your data is gone forever.</string>
-
+    <string name="header_text">Sleep Results</string>
+    <string name="close">Close</string>
+    <string name="minutes_length">%d minutes on %s</string>
+    <string name="hours_length">%d hours on %s</string>
+    <string name="seconds_length">%d seconds on %s</string>
 </resources>
