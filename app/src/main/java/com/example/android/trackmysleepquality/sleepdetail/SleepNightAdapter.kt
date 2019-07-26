@@ -2,6 +2,7 @@ package com.example.android.trackmysleepquality.sleepdetail
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.res.TypedArrayUtils.getString
@@ -50,5 +51,10 @@ class SleepNightAdapter : RecyclerView.Adapter<TextItemViewHolder>(){
         val view = layoutInflater.inflate(R.layout.text_item_view, parent, false)
                 as TextView
         return TextItemViewHolder(view)
+    }
+
+    class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+        val slpLength: TextView = itemView.findViewById(R.id.sleep_length)
+        val slpQuality: TextView = itemView.findViewById(R.id.sleep_quality)
     }
 }
