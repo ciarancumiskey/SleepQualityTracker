@@ -23,7 +23,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_sleep_5" />
+            app:srcCompat="@drawable/ic_sleep_5"
+            app:sleepImage="@{sleep}"/>
 
         <TextView
             android:id="@+id/sleep_quality"
@@ -32,12 +33,12 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text='"TextView"'
             app:layout_constraintBottom_toBottomOf="@+id/quality_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/quality_image"
             app:layout_constraintTop_toBottomOf="@+id/sleep_length"
-            tools:text="@string/sleep_quality_default" />
+            tools:text="@string/sleep_quality_default"
+            app:sleepQualityString="@{sleep}"/>
 
         <TextView
             android:id="@+id/sleep_length"
@@ -46,9 +47,10 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/sleep_length_default"
+            tools:text="@string/sleep_length_default"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/quality_image"
-            app:layout_constraintTop_toTopOf="@+id/quality_image" />
+            app:layout_constraintTop_toTopOf="@+id/quality_image"
+            app:sleepDurationFormatted="@{sleep}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
