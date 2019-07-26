@@ -1,15 +1,13 @@
 package com.example.android.trackmysleepquality.sleepdetail
 
-import android.graphics.Color
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.res.TypedArrayUtils.getString
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.R
-import com.example.android.trackmysleepquality.TextItemViewHolder
 import com.example.android.trackmysleepquality.convertDurationToFormatted
 import com.example.android.trackmysleepquality.convertNumericQualityToString
 import com.example.android.trackmysleepquality.database.SleepNight
@@ -28,20 +26,9 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = sleepData[position]
-        val itemRes = holder.itemView.context.resources
-        holder.slpLength.text =
-                convertDurationToFormatted(item.startTimeMilli, item.endTimeMilli, itemRes)
-        holder.slpQuality.text = convertNumericQualityToString(item.sleepQuality, itemRes)
-        holder.slpQualImage.setImageResource(when (item.sleepQuality) {
-            0 -> R.drawable.ic_sleep_0
-            1 -> R.drawable.ic_sleep_1
-            2 -> R.drawable.ic_sleep_2
-            3 -> R.drawable.ic_sleep_3
-            4 -> R.drawable.ic_sleep_4
-            5 -> R.drawable.ic_sleep_5
-            else -> R.drawable.ic_sleep_active
-        })
+        holder.bind(item)
     }
+
 
     /**
      * @param parent: The ViewGroup the View will be added to before getting displayed. In practice,
@@ -60,5 +47,25 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
         val slpLength: TextView = itemView.findViewById(R.id.sleep_length)
         val slpQuality: TextView = itemView.findViewById(R.id.sleep_quality)
         val slpQualImage: ImageView = itemView.findViewById(R.id.quality_image)
+
+        /**
+         *
+         * @param item: The SleepNight object which gets its data rendered
+         */
+         fun bind(item: SleepNight){
+            val itemRes = itemView.context.resources
+            slpLength.text =
+                    convertDurationToFormatted(item.startTimeMilli, item.endTimeMilli, itemRes)
+            slpQuality.text = convertNumericQualityToString(item.sleepQuality, itemRes)
+            slpQualImage.setImageResource(when (item.sleepQuality) {
+                0 -> R.drawable.ic_sleep_0
+                1 -> R.drawable.ic_sleep_1
+                2 -> R.drawable.ic_sleep_2
+                3 -> R.drawable.ic_sleep_3
+                4 -> R.drawable.ic_sleep_4
+                5 -> R.drawable.ic_sleep_5
+                else -> R.drawable.ic_sleep_active
+            })
+        }
     }
 }
