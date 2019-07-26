@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.convertDurationToFormatted
@@ -13,20 +14,27 @@ import com.example.android.trackmysleepquality.convertNumericQualityToString
 import com.example.android.trackmysleepquality.database.SleepNight
 import com.example.android.trackmysleepquality.sleepdetail.SleepNightAdapter.ViewHolder.Companion.from
 
-class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
-    var sleepData = listOf<SleepNight>()
-    set(value) {
-        field = value
-        /**
-         * notifyDataSetChanged() is inefficient (to the point of making the UI lag) for anything
-         * more complicated than a TextView.
-         */
-        notifyDataSetChanged()
-    }
-    override fun getItemCount() =  sleepData.size
+/**
+ * This Adapter provides a list of [SleepNight] entities to a RecyclerView.
+ */
+class SleepNightAdapter : androidx.recyclerview.widget.ListAdapter<SleepNight,
+        SleepNightAdapter.ViewHolder>(SleepNightDiffCallback()){
+    /**
+     * ListAdapter automatically tracks the data.
+     *
+     * var sleepData = listOf<SleepNight>()
+     * set(value) {
+     *     field = value
+     *
+     *     notifyDataSetChanged() is inefficient (to the point of making the UI lag) for anything
+     *     more complicated than a TextView. DiffUtils does it way better.
+     *
+     *     notifyDataSetChanged()
+    }*
+    override fun getItemCount() =  sleepData.size*/
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = sleepData[position]
+        val item = getItem(position)
         holder.bind(item)
     }
 
@@ -42,7 +50,9 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
     }
 
     /**
-     * ViewHolder can only be called from within this Adapter class.
+     * ViewHolder can only be called from within this Adapter class. It holds references to the
+     * items in the RecyclerView.
+     *
      * @param itemView: The itemView which will hold the corresponding SleepNight's values
      */
     class ViewHolder private constructor(itemView: View): RecyclerView.ViewHolder(itemView){
@@ -75,5 +85,16 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
                         .inflate(R.layout.list_item_sleep_night, parent, false))
             }
         }
+    }
+}
+
+class SleepNightDiffCallback : DiffUtil.ItemCallback<SleepNight>(){
+    override fun areContentsTheSame(oldItem: SleepNight, newItem: SleepNight): Boolean {
+        return oldItem.nightId == newItem.nightId
+    }
+
+    override fun areItemsTheSame(oldItem: SleepNight, newItem: SleepNight): Boolean {
+        //Because SleepNight is a data class, the == operator can be used
+        return oldItem == newItem
     }
 }

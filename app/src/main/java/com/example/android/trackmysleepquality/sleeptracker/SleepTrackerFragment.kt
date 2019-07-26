@@ -65,7 +65,7 @@ class SleepTrackerFragment : Fragment() {
         binding.sleepList.adapter = sleepNightAdapter
         sleepTrackerViewModel.nights.observe(viewLifecycleOwner, Observer {
             //Have a null check just in case of a null LiveData observer
-            it?.let{ sleepNightAdapter.sleepData = it }
+            it?.let{ sleepNightAdapter.submitList(it) }
         })
         binding.setLifecycleOwner(this)
 
