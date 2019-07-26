@@ -11,6 +11,7 @@ import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.convertDurationToFormatted
 import com.example.android.trackmysleepquality.convertNumericQualityToString
 import com.example.android.trackmysleepquality.database.SleepNight
+import com.example.android.trackmysleepquality.sleepdetail.SleepNightAdapter.ViewHolder.Companion.from
 
 class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
     var sleepData = listOf<SleepNight>()
@@ -37,13 +38,14 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
      * @return A ViewHolder for ItemViews
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        //attach toParent is false because RecyclerView takes care of attaching views automatically
-        val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_item_sleep_night, parent, false)
-        return ViewHolder(view)
+        return from(parent)
     }
 
-    class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+    /**
+     * ViewHolder can only be called from within this Adapter class.
+     * @param itemView: The itemView which will hold the corresponding SleepNight's values
+     */
+    class ViewHolder private constructor(itemView: View): RecyclerView.ViewHolder(itemView){
         val slpLength: TextView = itemView.findViewById(R.id.sleep_length)
         val slpQuality: TextView = itemView.findViewById(R.id.sleep_quality)
         val slpQualImage: ImageView = itemView.findViewById(R.id.quality_image)
@@ -66,6 +68,12 @@ class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
                 5 -> R.drawable.ic_sleep_5
                 else -> R.drawable.ic_sleep_active
             })
+        }
+        companion object {
+            fun from(parent: ViewGroup): ViewHolder {
+                return ViewHolder(LayoutInflater.from(parent.context)
+                        .inflate(R.layout.list_item_sleep_night, parent, false))
+            }
         }
     }
 }
