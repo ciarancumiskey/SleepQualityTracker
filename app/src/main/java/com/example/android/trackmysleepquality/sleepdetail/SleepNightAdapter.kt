@@ -4,14 +4,17 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.TypedArrayUtils.getString
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.TextItemViewHolder
+import com.example.android.trackmysleepquality.convertDurationToFormatted
+import com.example.android.trackmysleepquality.convertNumericQualityToString
 import com.example.android.trackmysleepquality.database.SleepNight
 
-class SleepNightAdapter : RecyclerView.Adapter<TextItemViewHolder>(){
+class SleepNightAdapter : RecyclerView.Adapter<SleepNightAdapter.ViewHolder>(){
     var sleepData = listOf<SleepNight>()
     set(value) {
         field = value
@@ -23,38 +26,39 @@ class SleepNightAdapter : RecyclerView.Adapter<TextItemViewHolder>(){
     }
     override fun getItemCount() =  sleepData.size
 
-    override fun onBindViewHolder(holder: TextItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = sleepData[position]
-        holder.textView.text = item.sleepQuality.toString()
-        when(item.sleepQuality) {
-            //Quick fix for "-1" showing while the user's adding a new SleepNight
-            -1 -> {
-                //Stops this text turning red if the user last entered 0/1
-                holder.textView.setTextColor(Color.BLACK)
-                holder.textView.setText(R.string.pending)
-            }
-            0, 1 -> holder.textView.setTextColor(Color.RED)
-            in 2..5 -> holder.textView.setTextColor(Color.BLACK)
-            else -> holder.textView.setText(R.string.quality_too_high)
-        }
+        val itemRes = holder.itemView.context.resources
+        holder.slpLength.text =
+                convertDurationToFormatted(item.startTimeMilli, item.endTimeMilli, itemRes)
+        holder.slpQuality.text = convertNumericQualityToString(item.sleepQuality, itemRes)
+        holder.slpQualImage.setImageResource(when (item.sleepQuality) {
+            0 -> R.drawable.ic_sleep_0
+            1 -> R.drawable.ic_sleep_1
+            2 -> R.drawable.ic_sleep_2
+            3 -> R.drawable.ic_sleep_3
+            4 -> R.drawable.ic_sleep_4
+            5 -> R.drawable.ic_sleep_5
+            else -> R.drawable.ic_sleep_active
+        })
     }
 
     /**
      * @param parent: The ViewGroup the View will be added to before getting displayed. In practice,
      * this is always a RecyclerView.
      * @param viewType:
-     * @return A ViewHolder for TextItems
+     * @return A ViewHolder for ItemViews
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextItemViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         //attach toParent is false because RecyclerView takes care of attaching views automatically
-        val view = layoutInflater.inflate(R.layout.text_item_view, parent, false)
-                as TextView
-        return TextItemViewHolder(view)
+        val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.list_item_sleep_night, parent, false)
+        return ViewHolder(view)
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val slpLength: TextView = itemView.findViewById(R.id.sleep_length)
         val slpQuality: TextView = itemView.findViewById(R.id.sleep_quality)
+        val slpQualImage: ImageView = itemView.findViewById(R.id.quality_image)
     }
 }
