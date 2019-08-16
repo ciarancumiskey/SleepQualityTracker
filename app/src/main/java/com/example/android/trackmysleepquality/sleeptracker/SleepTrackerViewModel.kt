@@ -17,6 +17,7 @@
 package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,7 +38,7 @@ class SleepTrackerViewModel(
      * viewModelJob allows us to cancel all coroutines started by this ViewModel.
      */
     private var viewModelJob = Job()
-
+    private var _TAG = "SleepTrackerViewModel"
     /**
      * A [CoroutineScope] keeps track of all coroutines started by this ViewModel.
      *
@@ -128,6 +129,27 @@ class SleepTrackerViewModel(
         _navigateToSleepQuality.value = null
     }
 
+
+    //LiveData for when the user is navigating to a Fragment showing the clicked night in more detail
+    private val _navigateToSleepDataQuality = MutableLiveData<Long>()
+    val navigateToSleepDataQuality
+        get() = _navigateToSleepDataQuality
+
+    /**
+     * Called when the user clicks on one of the list of icons representing SleepNights
+     * @param nightId: The ID of the selected SleepNight
+     */
+    fun onSleepNightClicked(nightId: Long) {
+        Log.d(_TAG, "Click on list item: ${database.getNightWithId(nightId)}")
+        _navigateToSleepDataQuality.value = nightId
+    }
+
+    // Called when the user's done navigating to more detail on the selected SleepNight
+    fun onSleepDataQualityNavigated(){
+        Log.d(_TAG, "Navigation complete for ${_navigateToSleepDataQuality.value}")
+        _navigateToSleepDataQuality.value = null
+        Log.d(_TAG, "_navigateToSleepDataQuality nullified")
+    }
     init {
         initializeTonight()
     }

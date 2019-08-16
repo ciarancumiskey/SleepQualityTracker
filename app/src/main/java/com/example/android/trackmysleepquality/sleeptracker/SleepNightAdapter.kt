@@ -1,5 +1,6 @@
 package com.example.android.trackmysleepquality.sleeptracker
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -28,8 +29,9 @@ class SleepNightAdapter(val clickListener: SleepNightClickListener) :
     }*
     override fun getItemCount() =  sleepData.size*/
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(clickListener, getItem(position)!!)
+    override fun onBindViewHolder(holder: ViewHolder, pos: Int) {
+        val item = getItem(pos)
+        holder.bind(clickListener, item)
     }
 
 
@@ -87,5 +89,8 @@ class SleepNightDiffCallback : DiffUtil.ItemCallback<SleepNight>(){
  * @param clickListener
  */
 class SleepNightClickListener(val clickListener: (sleepId: Long) -> Unit){
-    fun onClick(night : SleepNight) = clickListener(night.nightId)
+    fun onClick(night : SleepNight) {
+        Log.d("SleepNightClickListener", "Click")
+        clickListener(night.nightId)
+    }
 }

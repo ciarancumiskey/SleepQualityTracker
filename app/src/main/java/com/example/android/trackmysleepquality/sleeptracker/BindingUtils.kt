@@ -25,7 +25,7 @@ import com.example.android.trackmysleepquality.convertNumericQualityToString
 import com.example.android.trackmysleepquality.database.SleepNight
 
 @BindingAdapter("sleepImage")
-fun ImageView.setSleepImage(item: SleepNight) {
+fun ImageView.setSleepImage(item: SleepNight?) {
     item?.let{
         setImageResource(when (item.sleepQuality) {
             0 -> R.drawable.ic_sleep_0
