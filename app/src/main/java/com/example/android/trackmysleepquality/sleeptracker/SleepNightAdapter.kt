@@ -22,7 +22,7 @@ private const val ITEM_VIEW_TYPE_DATA = 1
  * This Adapter provides a list of [SleepNight] entities to a RecyclerView.
  */
 class SleepNightAdapter(val clickListener: SleepNightClickListener) :
-        ListAdapter<DataItem, RecyclerView.ViewHolder>(SleepNightDiffCallback()){
+        ListAdapter<GridItemWrapper, RecyclerView.ViewHolder>(SleepNightDiffCallback()){
     /**
      * ListAdapter automatically tracks the data.
      *
@@ -40,7 +40,7 @@ class SleepNightAdapter(val clickListener: SleepNightClickListener) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, pos: Int) {
         when (holder) {
             is ViewHolder -> {
-                val nightItem = getItem(pos) as DataItem.SleepNightItem
+                val nightItem = getItem(pos) as GridItemWrapper.WrappedSleepNightItem
                 holder.bind(clickListener, nightItem.sleepNight)
             }
         }
@@ -63,8 +63,8 @@ class SleepNightAdapter(val clickListener: SleepNightClickListener) :
 
     override fun getItemViewType(position: Int): Int {
         return when(getItem(position)){
-            is DataItem.Header -> ITEM_VIEW_TYPE_HEADER
-            is DataItem.SleepNightItem -> ITEM_VIEW_TYPE_DATA
+            is GridItemWrapper.Header -> ITEM_VIEW_TYPE_HEADER
+            is GridItemWrapper.WrappedSleepNightItem -> ITEM_VIEW_TYPE_DATA
         }
     }
 
@@ -72,8 +72,8 @@ class SleepNightAdapter(val clickListener: SleepNightClickListener) :
     fun addHeaderAndSubmitList(list: List<SleepNight>?){
         adapterScope.launch {
             val items = when (list) {
-                null -> listOf(DataItem.Header)
-                else -> listOf(DataItem.Header) + list.map { DataItem.SleepNightItem(it) }
+                null -> listOf(GridItemWrapper.Header)
+                else -> listOf(GridItemWrapper.Header) + list.map { GridItemWrapper.WrappedSleepNightItem(it) }
             }
             withContext(Dispatchers.Main){
                 submitList(items)
@@ -108,12 +108,12 @@ class SleepNightAdapter(val clickListener: SleepNightClickListener) :
     }
 }
 
-class SleepNightDiffCallback : DiffUtil.ItemCallback<DataItem>(){
-    override fun areContentsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
+class SleepNightDiffCallback : DiffUtil.ItemCallback<GridItemWrapper>(){
+    override fun areContentsTheSame(oldItem: GridItemWrapper, newItem: GridItemWrapper): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areItemsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
+    override fun areItemsTheSame(oldItem: GridItemWrapper, newItem: GridItemWrapper): Boolean {
         //Because SleepNight is a data class, the == operator can be used
         return oldItem == newItem
     }
@@ -141,22 +141,26 @@ class TextViewHolder(view: View): RecyclerView.ViewHolder(view) {
 }
 
 /**
+ * Provides a wrapper class for ListItems. Not really useful for RecyclerViews with 1 or 2 item
+ * types, this is just to serve as an example.
+ *
  * A sealed class can't be overridden elsewhere in this code.
  */
-sealed class DataItem {
+sealed class GridItemWrapper
+{
     /**
      * Wrapper class for a SleepNight
      * @param sleepNight: The specific instance of SleepNight being wrapped
-     * @return a DataItem wrapper
+     * @return a GridItemWrapper wrapper
      */
-    data class SleepNightItem(val sleepNight: SleepNight): DataItem() {
+    data class WrappedSleepNightItem(val sleepNight: SleepNight): GridItemWrapper() {
         override val id = sleepNight.nightId
     }
 
     /**
      * Wrapper class for the RecyclerView's Header, of which there's just one instance
      */
-    object Header: DataItem() {
+    object Header: GridItemWrapper() {
         override val id = Long.MIN_VALUE
     }
     abstract val id: Long
