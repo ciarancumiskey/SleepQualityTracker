@@ -107,11 +107,11 @@ class SleepTrackerFragment : Fragment() {
                 sleepTrackerViewModel.onSleepDataQualityNavigated()
             }
         })
-
-        val manager = GridLayoutManager(activity, 3)
+        val rowWidth = 3
+        val manager = GridLayoutManager(activity, rowWidth)
         manager.spanSizeLookup = object: GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(pos: Int) = when(pos){
-                0 -> 3 // First item in the grid should span the whole top row
+                0 -> rowWidth // First item in the grid should span the whole top row
                 else -> 1
             }
         }
